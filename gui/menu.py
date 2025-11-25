@@ -57,18 +57,25 @@ class App():
         frame.pack(fill='both', expand=True)
         
         tk.Label(frame, text="Alinhamento:").grid(row=0, column=0, sticky='w')
-        text = tk.Text(frame, height=2, width=32, wrap='word', font=("Arial", 16))
-        text.insert('1.0', a+'\n'+b), text.config(state='disabled')
-        text.grid(row=1, column=0, pady=(0, 8), sticky='ew')
+        text = tk.Text(frame, height=2, width=32, wrap='none', font=("Arial", 16))
+        text.insert('1.0', a+'\n'+b), text.config(state='disabled'), text.grid(row=1, column=0, sticky='we')
+
+        def scroll(event, text_widget):
+            if event.delta > 0: text_widget.xview_scroll(-1, "units")
+            elif event.delta < 0: text_widget.xview_scroll(1, "units")
+
+        scrollbar = tk.Scrollbar(frame, orient='horizontal', command=text.xview)
+        scrollbar.grid(row=2, column=0, sticky='we'), text.config(xscrollcommand=scrollbar.set)
+        text.bind("<MouseWheel>", lambda event: scroll(event, text)) # Interação do scroll do mouse (vert.) com a scrollbar (hor.)
 
         string = f"N° de Gaps: {log['gaps']}\nN° de Mismatches: {log['mism']}"
-        tk.Label(frame, text=string, justify='left').grid(row=2, column=0, pady=(0, 12), sticky='w')
+        tk.Label(frame, text=string, justify='left').grid(row=3, column=0, pady=(5, 12), sticky='w')
 
-        tk.Button(frame, text="Exportar", width=8, command=lambda: self.on_export(win, a, b, log)).grid(row=5, column=0, sticky='sw')
-        tk.Button(frame, text="Voltar", width=8, command=win.destroy).grid(row=5, column=0, padx=(66, 0), sticky='sw')
+        tk.Button(frame, text="Exportar", width=8, command=lambda: self.on_export(win, a, b, log)).grid(row=4, column=0, sticky='sw')
+        tk.Button(frame, text="Voltar", width=8, command=win.destroy).grid(row=4, column=0, padx=(66, 0), sticky='sw')
 
         frame.grid_columnconfigure(0, weight=1)
-        frame.grid_rowconfigure(3, weight=1)
+        frame.grid_rowconfigure(4, weight=1)
 
 
     def on_export(self, win, a, b, log):
