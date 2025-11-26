@@ -8,16 +8,18 @@ class App():
         self.root = root
         self.path = path
         self.a, self.b = tk.StringVar(), tk.StringVar()
+        self.g, self.m = 1, 1
+        self.priority = ['Mismatch', 'Gap em X', 'Gap em Y']
 
         self.root.title("Alinhador de Sequências")
         frame = tk.Frame(self.root, padx=12, pady=12)
         frame.pack(fill='both', expand=True)
 
-        tk.Label(frame, text="Alinhador de\nSequências", font='sylfaen') \
+        tk.Label(frame, text="Alinhador de\nSequências", font=('sylfaen', 16)) \
             .grid(row=0, column=0, pady=(0, 12), sticky='ew')
         
         img = tk.PhotoImage(file="./docs/assets/menu.png")
-        menu_bt = tk.Button(frame, image=img, width=12, height=12, command=self.set_order)
+        menu_bt = tk.Button(frame, image=img, width=12, height=12, command=self.on_config)
         menu_bt.image = img
         menu_bt.grid(row=0, column=0, sticky="se")
         
@@ -87,5 +89,44 @@ class App():
             messagebox.showerror('Erro', f'Ocorreu um erro ao salvar em "{self.path}".', parent=win)
 
 
-    def set_order(self):
-        messagebox.showinfo('Ordem de alinhamento', f'WIP', parent=self.root)
+    def on_config(self):
+        win = tk.Toplevel(self.root)
+        win.title(f"Configurações")
+        win.resizable(False, False), win.grab_set()
+        
+        gap, mism, priority = tk.IntVar(value=self.g), tk.IntVar(value=self.m), self.priority[:]
+
+        frame = tk.Frame(win, padx=8, pady=8)
+        frame.pack()
+        
+        tk.Label(frame, text="Configurações", font=('sylfaen', 13)).grid(row=0, column=0, sticky='w')
+
+        tk.Label(frame, text="Pesos", font=("Arial", 10, 'bold')).grid(row=1, column=0, columnspan=2, pady=(10, 4))
+        tk.Label(frame, text="Peso do Gap:").grid(row=2, column=0, sticky='w')
+        tk.Label(frame, text="Peso do Mismatch:").grid(row=3, column=0, sticky='w')
+
+        g_spinbox = tk.Spinbox(frame, from_=0, to=float('inf'), textvariable=gap, state="normal", width=4)
+        g_spinbox.grid(row=2, column=1, sticky='e')
+        g_spinbox = tk.Spinbox(frame, from_=0, to=float('inf'), textvariable=mism, state="normal", width=4)
+        g_spinbox.grid(row=3, column=1, sticky='e')
+
+        tk.Label(frame, text="Prioridades", font=("Arial", 10, 'bold')).grid(row=4, column=0, columnspan=2, pady=(10, 4))
+        listbox = tk.Listbox(frame, height=3, width=26, justify='center')
+        listbox.grid(row=5, column=0, columnspan=2, pady=(0, 10), sticky='we')
+
+        def refresh(self):
+            if len(listbox.curselection()) and listbox.curselection()[0]:
+                p = listbox.curselection()[0]
+                top, down = listbox.get(p-1)[3:], listbox.get(p)[3:]
+                listbox.insert(p-1, f'{p}. '+down), listbox.insert(p, f'{p+1}. '+top), listbox.delete(p+1, p+2)
+            listbox.select_clear(0, tk.END)
+
+        def apply(g, m, p): self.g, self.m, self.priority[:] = g, m, p
+
+        tk.Button(frame, text="Aplicar", width=8, command=lambda: apply(gap.get(), mism.get(), [el[3:] for el in listbox.get(0, tk.END)])) \
+            .grid(row=6, column=0, columnspan=2, padx=(14, 0), sticky='sw')
+        tk.Button(frame, text="Voltar", width=8, command=win.destroy) \
+            .grid(row=6, column=0, columnspan=2, padx=(80, 0), sticky='sw')
+
+        listbox.bind("<Button-1>", lambda event: self.root.after(100, refresh, event), add=True)
+        for i in range(3): listbox.insert(tk.END, f'{i+1}. '+self.priority[i])
