@@ -46,21 +46,23 @@ class App():
         if not self.y.get():
             return messagebox.showwarning('String Vazia', f'A string (Y) não pode ser vazia!', parent=self.root)
         
-        #try: 
-        a, b, log = alignment(self.config, self.x.get(), self.y.get())
-        self.alignment(a, b, log)
-        #except Exception:
-        #    messagebox.showerror('Erro', f'Ocorreu um erro no alinhamento.', parent=self.root)
+        try: 
+            a, b, log = alignment(self.config, self.x.get(), self.y.get())
+            self.alignment(a, b, log)
+        except Exception:
+            messagebox.showerror('Erro', f'Ocorreu um erro no alinhamento.', parent=self.root)
 
 
     def on_export(self, win, a, b, log):
-        #try:
-            info = f'matches={log['matches']}, mismatches={len(log['mismatches'])}, x_gaps={log['x_gaps']}, y_gaps={log['y_gaps']}'
+        try:
+            info = f'matches={log['matches']}, mismatches={len(log['mismatches'])}, ' \
+                   f'x_gaps={log['x_gaps']}, y_gaps={log['y_gaps']}, ' \
+                   f'gap_cost={self.config['gap_weight']}, mism_cost={self.config['mism_weight']}'
             with open(self.path, "w", encoding='utf-8') as f:
                 f.write(a + '\n' + b + '\n\n' + info)
             messagebox.showinfo('Alinhamento salvo', f'O alinhamento foi salvo em "{self.path}".', parent=win)
-        #except Exception: 
-        #    messagebox.showerror('Erro', f'Ocorreu um erro ao salvar em "{self.path}".', parent=win)
+        except Exception: 
+            messagebox.showerror('Erro', f'Ocorreu um erro ao salvar em "{self.path}".', parent=win)
 
 
     def on_config(self):
@@ -137,7 +139,9 @@ class App():
         scrollbar.grid(row=2, column=0, sticky='we'), text.config(xscrollcommand=scrollbar.set)
         text.bind("<MouseWheel>", lambda event: scroll(event, text)) # Interação do scroll do mouse (vert.) com a scrollbar (hor.)
 
-        string = f"N° de Gaps: {log['x_gaps']+log['y_gaps']} (x: {log['x_gaps']}, y: {log['y_gaps']})\n" \
+        string = f"Custo: {log['cost']} (g: {self.config['gap_weight']}×{log['x_gaps']+log['y_gaps']}, " \
+                 f"m: {self.config['mism_weight']}×{len(log['mismatches'])})\n" \
+                 f"N° de Gaps: {log['x_gaps']+log['y_gaps']} (x: {log['x_gaps']}, y: {log['y_gaps']})\n" \
                  f"N° de Mismatches: {len(log['mismatches'])}"
         tk.Label(frame, text=string, justify='left').grid(row=3, column=0, pady=(5, 12), sticky='w')
 
