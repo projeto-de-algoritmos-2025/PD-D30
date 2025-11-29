@@ -115,7 +115,12 @@ class App():
 
 
     def on_help(self):
-        help_text = 'Menu de ajuda'
+        help_text = '> Pesos\n' \
+                    'O peso é a maneira como\no algoritmo prioriza suas\n' \
+                    'ações (gap ou mismatch)\ndurante o alinhamento.\n\n' \
+                    '> Prioridades\n' \
+                    'A prioridade é o desempate\npara o caso em que custos' \
+                    ' de\ngap e mismatch forem iguais.'
         messagebox.showinfo('Ajuda', help_text)
 
 
