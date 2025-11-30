@@ -4,7 +4,7 @@ def alignment(config, x='', y=''):
     log = {
         'cost': 0,
         'matches': 0,
-        'mismatches': [],
+        'mismatches': '',
         'x_gaps': 0,
         'y_gaps': 0
     }
@@ -31,6 +31,8 @@ def alignment(config, x='', y=''):
     a, b = '', ''
     
     while i or j:
+        log['mismatches'] += ' '
+
         if costs[i][j][1] == 'Gap em X':
             log['cost'] += config['gap_weight']; log['x_gaps'] += 1
             a = '□' + a; b = y[j-1] + b; j -= 1
@@ -41,12 +43,14 @@ def alignment(config, x='', y=''):
             if costs[i][j][1] == 'Match':
                 log['matches'] += 1
             elif costs[i][j][1] == 'Mismatch':
-                log['mismatches'].append(len(b))
+                log['mismatches'] = log['mismatches'][:-1] + 'M'
                 log['cost'] += config['mism_weight']
             
             a = x[i-1] + a; b = y[j-1] + b
             i -= 1; j -= 1
 
+
+    log['mismatches'] = log['mismatches'][::-1]
     return a, b, log
 
 # gap char: □ (U+25A1)

@@ -55,11 +55,12 @@ class App():
 
     def on_export(self, win, a, b, log):
         try:
-            info = f'matches={log['matches']}, mismatches={len(log['mismatches'])}, ' \
+            info = f'{'\n'+log['mismatches'] if self.mism_flag else ''}\n\n' \
+                   f'matches={log['matches']}, mismatches={log['mismatches'].count('M')}, ' \
                    f'x_gaps={log['x_gaps']}, y_gaps={log['y_gaps']}, ' \
-                   f'gap_cost={self.config['gap_weight']}, mism_cost={self.config['mism_weight']}'
+                   f'mism_cost={self.config['mism_weight']}, gap_cost={self.config['gap_weight']}'
             with open(self.path, "w", encoding='utf-8') as f:
-                f.write(a + '\n' + b + '\n\n' + info)
+                f.write(a + '\n' + b + info)
             messagebox.showinfo('Alinhamento salvo', f'O alinhamento foi salvo em "{self.path}".', parent=win)
         except Exception: 
             messagebox.showerror('Erro', f'Ocorreu um erro ao salvar em "{self.path}".', parent=win)
@@ -124,6 +125,16 @@ class App():
         messagebox.showinfo('Ajuda', help_text)
 
 
+    def highlight(self, text, mism):
+        self.mism_flag = not self.mism_flag
+        text.config(state='normal')
+
+        if self.mism_flag: text.config(height=3), text.insert('3.0', '\nM: '+mism)
+        else: text.delete('3.0', '4.0'), text.config(height=2)
+
+        text.config(state='disabled')
+
+
     def alignment(self, a, b, log):
         win = tk.Toplevel(self.root)
         win.title(f"Resultado do Alinhamento")
@@ -145,11 +156,14 @@ class App():
         text.bind("<MouseWheel>", lambda event: scroll(event, text)) # Interação do scroll do mouse (vert.) com a scrollbar (hor.)
 
         string = f"Custo: {log['cost']} (g: {self.config['gap_weight']}×{log['x_gaps']+log['y_gaps']}, " \
-                 f"m: {self.config['mism_weight']}×{len(log['mismatches'])})\n" \
+                 f"m: {self.config['mism_weight']}×{log['mismatches'].count('M')})\n" \
                  f"N° de Gaps: {log['x_gaps']+log['y_gaps']} (x: {log['x_gaps']}, y: {log['y_gaps']})\n" \
-                 f"N° de Mismatches: {len(log['mismatches'])}"
+                 f"N° de Mismatches: {log['mismatches'].count('M')}"
         tk.Label(frame, text=string, justify='left').grid(row=3, column=0, pady=(5, 12), sticky='w')
 
+        self.mism_flag = False
+        tk.Checkbutton(frame, text="Destacar Mismatches", command=lambda: self.highlight(text, log['mismatches'])) \
+            .grid(row=0, column=0, sticky='e')
         tk.Button(frame, text="Exportar", width=8, command=lambda: self.on_export(win, a, b, log)) \
             .grid(row=4, column=0, sticky='sw')
         tk.Button(frame, text="Voltar", width=8, command=win.destroy) \
