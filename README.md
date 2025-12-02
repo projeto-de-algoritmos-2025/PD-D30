@@ -15,7 +15,7 @@ O ***SeqAlign*** é um alinhador de sequências desenvolvido para o módulo 5 da
 
 ## Apresentação
 
-Confira a apresentação do projeto pela [**dupla**](#alunos) no link: ***https://youtu.be/ 🔗***
+Confira a apresentação do projeto pela [**dupla**](#alunos) no link: ***https://youtu.be/S7_P8JNkSig 🔗***
 
 <br>
 
